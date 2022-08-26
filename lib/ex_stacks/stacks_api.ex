@@ -1182,6 +1182,12 @@ defmodule ExStacks.StacksAPI do
     end
   end
 
+  # Left to do:
+  # - Documentation
+  # - Rosetta API calls
+  # - Sign a transaction
+  # - Submit a signed transaciton
+  # - Subscribe to events
   # def request("available_networks", _params) do
   #   HttpClient.endpoint_post_callback(Helpers.node_url() <> "/rosetta/v1/network/list", %{})
   # end
