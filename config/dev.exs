@@ -52,3 +52,6 @@ config :phoenix, :stacktrace_depth, 20
 
 # Initialize plugs at runtime for faster development compilation
 config :phoenix, :plug_init_mode, :runtime
+
+config :ex_stacks,
+  node_url: "https://stacks-node-api.mainnet.stacks.co"

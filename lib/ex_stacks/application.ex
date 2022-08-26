@@ -11,9 +11,9 @@ defmodule ExStacks.Application do
       # Start the Telemetry supervisor
       ExStacksWeb.Telemetry,
       # Start the PubSub system
-      {Phoenix.PubSub, name: ExStacks.PubSub},
+      {Phoenix.PubSub, name: ExStacks.PubSub}
       # Start the Endpoint (http/https)
-      ExStacksWeb.Endpoint
+      # ExStacksWeb.Endpoint
       # Start a worker by calling: ExStacks.Worker.start_link(arg)
       # {ExStacks.Worker, arg}
     ]
