@@ -42,11 +42,8 @@ defmodule ExStacks.MixProject do
       {:plug, "~> 1.13"},
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8"},
-      {:poison, "~> 5.0"}
-      # {:phoenix_gen_socket_client, "~> 4.0"},
-      # {:websocket_client, "~> 1.2"},
-      # {:websockex, "~> 0.4.3"},
-      # {:json_rpc, "~> 0.1.0"}
+      {:poison, "~> 5.0"},
+      {:websockex, "~> 0.4.3"}
     ]
   end
 

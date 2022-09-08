@@ -90,4 +90,14 @@ defmodule ExStacks.Helpers do
     end)
     |> Enum.join("&")
   end
+
+  def format_websocket_frame(%{method: method} = map) do
+    %{
+      jsonrpc: "2.0",
+      method: method,
+      params: Map.delete(map, :method),
+      id: method
+    }
+    |> Poison.encode!()
+  end
 end

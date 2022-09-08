@@ -54,4 +54,5 @@ config :phoenix, :stacktrace_depth, 20
 config :phoenix, :plug_init_mode, :runtime
 
 config :ex_stacks,
-  node_url: "https://stacks-node-api.mainnet.stacks.co"
+  node_url: "https://stacks-node-api.mainnet.stacks.co",
+  node_ws_url: "wss://stacks-node-api.testnet.stacks.co/extended/v1/ws"

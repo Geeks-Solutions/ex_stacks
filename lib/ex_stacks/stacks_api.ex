@@ -2,7 +2,7 @@ defmodule ExStacks.StacksAPI do
   @moduledoc """
   This module is responsible of communicating with the Stacks Blockchain
   """
-  alias ExStacks.{Helpers, HttpClient}
+  alias ExStacks.{Helpers, HttpClient, WebSocketClient}
 
   defp required_params_available?(params, required_params) when is_map(params) do
     params = params |> Helpers.atomize_keys()
@@ -123,6 +123,7 @@ defmodule ExStacks.StacksAPI do
        - the return of the API Call
        - {:error, :missing_required_params, [list,of,missing,required,parameters]} - Returned without hitting the API when one of the API call's required parameters are missing.
        - {:error, :invalid_params} - Returned when the params input is not a map.
+       - {:error, :unexpected_name} - Returned when the request name is not supported.
   """
   def request(string, params \\ %{})
 
@@ -1754,6 +1755,143 @@ defmodule ExStacks.StacksAPI do
     end
   end
 
-  # Left to do:
-  # - Subscribe to events
+  def request(_, _) do
+    {:error, :unsupported_name}
+  end
+
+  @doc """
+    Used to subscribe to Stacks WebSocket Server events.
+
+  ## Available Events with their parameters:
+
+      - ``block``, no parameters - Subscribes to newly mined block events
+      - ``microblock``, no parameters - Subscribes to newly streamed microblocks events
+      - ``mempool``, no parameters - Subscribes to new transaction added to mempool events
+      - ``tx_updates``, parameters: ``:tx_id`` - Subscribes to new updates to this specific transaction
+      - ``address_tx_updates``, parameters: ``:address`` - Subscribes to new updates to transactions for this specific address
+      - ``address_balance_update``, parameters: ``:address`` - Subscribes to new updates to this specific address' balance
+
+  ## Returns
+
+      Returns an ``:ok`` confirming the message has been relayed.
+  """
+  def subscribe(method, params \\ %{})
+
+  def subscribe("block", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "block"})
+    )
+  end
+
+  def subscribe("microblock", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "microblock"})
+    )
+  end
+
+  def subscribe("mempool", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "mempool"})
+    )
+  end
+
+  def subscribe("tx_update", %{tx_id: transaction_id}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "subscribe",
+        event: "tx_update",
+        tx_id: transaction_id
+      })
+    )
+  end
+
+  def subscribe("address_tx_update", %{address: address}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "subscribe",
+        event: "address_tx_update",
+        address: address
+      })
+    )
+  end
+
+  def subscribe("address_balance_update", %{address: address}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "subscribe",
+        event: "address_balance_update",
+        address: address
+      })
+    )
+  end
+
+  def subscribe(_, _), do: {:error, :invalid_input}
+
+  @doc """
+    Used to unsubscribe from Stacks WebSocket Server events.
+
+  ## Available Events with their parameters:
+
+      - ``block``, no parameters - Subscribes to newly mined block events
+      - ``microblock``, no parameters - Subscribes to newly streamed microblocks events
+      - ``mempool``, no parameters - Subscribes to new transaction added to mempool events
+      - ``tx_updates``, parameters: ``:tx_id`` - Subscribes to new updates to this specific transaction
+      - ``address_tx_updates``, parameters: ``:address`` - Subscribes to new updates to transactions for this specific address
+      - ``address_balance_update``, parameters: ``:address`` - Subscribes to new updates to this specific address' balance
+
+  ## Returns
+
+      Returns an ``:ok`` confirming the message has been relayed.
+  """
+  def unsubscribe(method, params \\ %{})
+
+  def unsubscribe("block", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "block"})
+    )
+  end
+
+  def unsubscribe("microblock", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "microblock"})
+    )
+  end
+
+  def unsubscribe("mempool", _params) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "mempool"})
+    )
+  end
+
+  def unsubscribe("tx_update", %{tx_id: transaction_id}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "unsubscribe",
+        event: "tx_update",
+        tx_id: transaction_id
+      })
+    )
+  end
+
+  def unsubscribe("address_tx_update", %{address: address}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "unsubscribe",
+        event: "address_tx_update",
+        address: address
+      })
+    )
+  end
+
+  def unsubscribe("address_balance_update", %{address: address}) do
+    WebSocketClient.send_frame(
+      Helpers.format_websocket_frame(%{
+        method: "unsubscribe",
+        event: "address_balance_update",
+        address: address
+      })
+    )
+  end
+
+  def unsubscribe(_, _), do: {:error, :invalid_input}
 end
