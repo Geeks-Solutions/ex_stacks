@@ -1,8 +1,20 @@
 defmodule ExStacks.HttpClient do
   @moduledoc """
-  HTTP Client for the library
+  HTTP Client for the library that handles relaying HTTP requests.
   """
 
+  @doc """
+    Sends a GET request.
+
+  ## Examples
+
+      iex> endpoint_get_callback("https://some_endpoint")
+      %{message: "some response"}
+
+  ## Returns
+
+      Returns either the body of a successful request or an ``{:error, error}`` tuple.
+  """
   def endpoint_get_callback(
         url,
         headers \\ [{"content-type", "application/json"}]
@@ -16,6 +28,18 @@ defmodule ExStacks.HttpClient do
     end
   end
 
+  @doc """
+    Sends a PUT request.
+
+  ## Examples
+
+      iex> endpoint_put_callback("https://some_endpoint", %{arg_1: "value_1})
+      %{message: "some response"}
+
+  ## Returns
+
+      Returns either the body of a successful request or an ``{:error, error}`` tuple.
+  """
   def endpoint_put_callback(
         url,
         args,
@@ -32,6 +56,18 @@ defmodule ExStacks.HttpClient do
     end
   end
 
+  @doc """
+    Sends a POST request.
+
+  ## Examples
+
+      iex> endpoint_post_callback("https://some_endpoint", %{arg_1: "value_1})
+      %{message: "some response"}
+
+  ## Returns
+
+      Returns either the body of a successful request or an ``{:error, error}`` tuple.
+  """
   def endpoint_post_callback(
         url,
         args,

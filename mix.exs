@@ -38,9 +38,15 @@ defmodule ExStacks.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
+      {:cowboy, "~> 2.9"},
+      {:plug, "~> 1.13"},
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8"},
       {:poison, "~> 5.0"}
+      # {:phoenix_gen_socket_client, "~> 4.0"},
+      # {:websocket_client, "~> 1.2"},
+      # {:websockex, "~> 0.4.3"},
+      # {:json_rpc, "~> 0.1.0"}
     ]
   end
 

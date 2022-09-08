@@ -2,6 +2,22 @@ defmodule ExStacks.Helpers do
   @moduledoc """
   Helper functions for the library
   """
+
+  @doc """
+    Used to retrieve an environment variable from the :ex_stacks otp_app config.
+
+  ## Examples
+
+      iex> env(:some_key)
+      "some value"
+
+  ## Available options:
+      - :raise - Boolean - Raise an error in the case of the environment variable does not exist.
+      - :default - any - default value in the case the environment variable does not exist.
+  ## Returns
+
+      Returns either the value, or the default.
+  """
   def env(key, opts \\ %{default: nil, raise: false}) do
     Application.get_env(:ex_stacks, key)
     |> case do
@@ -18,8 +34,18 @@ defmodule ExStacks.Helpers do
     end
   end
 
+  @doc """
+    Used to retrieve the Stacks Node base URL environment variable.
+  """
   def node_url do
     env(:node_url, %{raise: true})
+  end
+
+  @doc """
+    Used to retrieve the Stacks Node WebSocket base URL environment variable.
+  """
+  def node_ws_url do
+    env(:node_ws_url, %{raise: true})
   end
 
   @doc """
