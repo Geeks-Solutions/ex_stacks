@@ -32,7 +32,7 @@ defmodule ExStacks.StacksAPI do
     Used to hit the Stacks API.
 
   ## Available API Calls (case sensitive)
-      - ``available_balances`` - Get Account Balances
+      - ``account_balances`` - Get Account Balances
       - ``account_stx_balance`` - Get Account STX Balance
       - ``account_transactions`` - Get Account Transactions
       - ``account_transactions_with_transfers`` - Get Account Transactions including STX Transfers for each transaction
@@ -127,1633 +127,367 @@ defmodule ExStacks.StacksAPI do
   """
   def request(string, params \\ %{})
 
-  def request("account_balances", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
+  def request("account_balances" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
+  def request("account_stx_balance" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
 
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/balances?#{query_params}"
+  def request("account_transactions" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
 
-        HttpClient.endpoint_get_callback(url)
+  def request("account_transactions_with_transfers" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("account_transaction_by_id" = action, params),
+    do: validate_and_request(:get, action, params, [:principal, :tx_id])
 
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("account_nonces" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
+
+  def request("account_stx_inbound" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
+
+  def request("account_assets" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
+
+  def request("account_information" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
+
+  def request("recent_blocks" = action, params),
+    do: validate_and_request(:get, action, params, [])
+
+  def request("block_by_hash" = action, params),
+    do: validate_and_request(:get, action, params, [:hash])
+
+  def request("block_by_height" = action, params),
+    do: validate_and_request(:get, action, params, [:height])
+
+  def request("block_by_burnchain_height" = action, params),
+    do: validate_and_request(:get, action, params, [:burn_block_height])
+
+  def request("block_by_burnchain_hash" = action, params),
+    do: validate_and_request(:get, action, params, [:burn_block_hash])
+
+  def request("estimated_stx_transfer_transaction_fee" = action, _params) do
+    HttpClient.endpoint_get_callback(url(action, %{}))
   end
 
-  def request("account_stx_balance", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/stx?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_transactions", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/transactions?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_transactions_with_transfers", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/transactions_with_transfers?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_transaction_by_id", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal, :tx_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        tx_id = Map.get(params, :tx_id)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/#{tx_id}/with_transfers?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_nonces", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/nonces?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_stx_inbound", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/stx_inbound?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_assets", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{principal}/assets?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_information", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        principal = Map.get(params, :principal)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/v2/#{principal}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recent_blocks", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/block?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block_by_hash", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:hash]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        hash = Map.get(params, :hash)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/block/#{hash}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block_by_height", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:height]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        hash = Map.get(params, :height)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/block/by_height/#{hash}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block_by_burnchain_height", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:burn_block_height]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        hash = Map.get(params, :burn_block_height)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/block/by_burn_block_height/#{hash}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block_by_burnchain_hash", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:burn_block_hash]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        hash = Map.get(params, :burn_block_hash)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/block/by_burn_block_hash/#{hash}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("estimated_stx_transfer_transaction_fee", _params) do
-    node_base_url = Helpers.node_url()
-
-    url =
-      node_base_url <>
-        "/v2/fees/transfer"
-
-    HttpClient.endpoint_get_callback(url)
-  end
-
-  def request("estimated_transaction_fee", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:transaction_payload]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        transaction_payload = Map.get(params, :transaction_payload)
-
-        body =
-          %{"transaction_payload" => transaction_payload}
-          |> add_optional_param(params, :estimated_len)
-
-        url =
-          node_base_url <>
-            "/v2/fees/transaction"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("fts_metadata", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tokens/ft/metadata?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("ft_by_contract_id_metadata", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_id = Map.get(params, :contract_id)
-
-        url =
-          node_base_url <>
-            "/extended/v1/tokens/#{contract_id}/ft/metadata"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("core_api_info", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v2/info")
-  end
-
-  def request("api_status", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/extended/v1/status")
-  end
-
-  def request("network_block_time", _params) do
-    HttpClient.endpoint_get_callback(
-      Helpers.node_url() <> "/extended/v1/info/network_block_times"
+  def request("estimated_transaction_fee" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:transaction_payload],
+      [:transaction_payload],
+      [:estimated_len]
     )
   end
 
-  def request("proof_of_transfer_details", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v2/pox")
-  end
+  def request("fts_metadata" = action, params), do: validate_and_request(:get, action, params, [])
 
-  def request("given_network_block_time", params) do
-    url = Helpers.node_url()
-    required_params = [:network]
+  def request("ft_by_contract_id_metadata" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_id])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network = Map.get(params, :network)
+  def request("core_api_info", _params),
+    do: HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v2/info")
 
-        HttpClient.endpoint_get_callback(url <> "/extended/v1/info/network_block_time/#{network}")
+  def request("api_status", _params),
+    do: HttpClient.endpoint_get_callback(Helpers.node_url() <> "/extended/v1/status")
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("network_block_time", _params),
+    do:
+      HttpClient.endpoint_get_callback(
+        Helpers.node_url() <> "/extended/v1/info/network_block_times"
+      )
 
-      false ->
-        {:error, :invalid_params}
-    end
-  end
+  def request("proof_of_transfer_details", _params),
+    do: HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v2/pox")
 
-  def request("stx_supply", params) do
-    node_url = Helpers.node_url()
-    required_params = []
+  def request("given_network_block_time" = action, params),
+    do: validate_and_request(:get, action, params, [:network])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-        HttpClient.endpoint_get_callback(node_url <> "/extended/v1/stx_supply?#{query_params}")
+  def request("stx_supply" = action, params), do: validate_and_request(:get, action, params, [])
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("legacy_stx_supply" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-      false ->
-        {:error, :invalid_params}
-    end
-  end
+  def request("total_stx_supply_plain_text", _params),
+    do:
+      HttpClient.endpoint_get_callback(
+        Helpers.node_url() <> "/extended/v1/stx_supply/total/plain"
+      )
 
-  def request("legacy_stx_supply", params) do
-    node_url = Helpers.node_url()
-    required_params = []
+  def request("circulating_stx_supply_plain_text", _params),
+    do:
+      HttpClient.endpoint_get_callback(
+        Helpers.node_url() <> "/extended/v1/stx_supply/circulating/plain"
+      )
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
+  def request("recent_microblocks" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-        HttpClient.endpoint_get_callback(
-          node_url <> "/extended/v1/stx_supply/legacy_format?#{query_params}"
-        )
+  def request("microblock" = action, params),
+    do: validate_and_request(:get, action, params, [:hash])
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("transactions_in_unanchored_microblocks", _params),
+    do:
+      HttpClient.endpoint_get_callback(
+        Helpers.node_url() <> "/extended/v1/microblock/unanchored/txs"
+      )
 
-      false ->
-        {:error, :invalid_params}
-    end
-  end
+  def request("namespace_price" = action, params),
+    do: validate_and_request(:get, action, params, [:tld])
 
-  def request("total_stx_supply_plain_text", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/extended/v1/stx_supply/total/plain")
-  end
+  def request("name_price" = action, params),
+    do: validate_and_request(:get, action, params, [:name])
 
-  def request("circulating_stx_supply_plain_text", _params) do
-    HttpClient.endpoint_get_callback(
-      Helpers.node_url() <> "/extended/v1/stx_supply/circulating/plain"
+  def request("namespaces", _params),
+    do: HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v1/namespaces")
+
+  def request("namespace_names" = action, params),
+    do: validate_and_request(:get, action, params, [:tld])
+
+  def request("names", _params),
+    do: HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v1/names")
+
+  def request("name_details" = action, params),
+    do: validate_and_request(:get, action, params, [:name])
+
+  def request("name_subdomains" = action, params),
+    do: validate_and_request(:get, action, params, [:name])
+
+  def request("name_zonefile" = action, params),
+    do: validate_and_request(:get, action, params, [:name])
+
+  def request("name_historical_zonefile" = action, params),
+    do: validate_and_request(:get, action, params, [:name, :zonefile_hash])
+
+  def request("names_owned_by_address" = action, params),
+    do: validate_and_request(:get, action, params, [:blockchain, :address])
+
+  def request("nft_holdings" = action, params),
+    do: validate_and_request(:get, action, params, [:principal])
+
+  def request("nft_history" = action, params),
+    do: validate_and_request(:get, action, params, [:asset_identifier, :value])
+
+  def request("nft_mints" = action, params),
+    do: validate_and_request(:get, action, params, [:asset_identifier])
+
+  def request("nfts_metadata" = action, params),
+    do: validate_and_request(:get, action, params, [])
+
+  def request("nft_by_contract_id_metadata" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_id])
+
+  def request("contract_info" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_id])
+
+  def request("contracts_by_trait" = action, params),
+    do: validate_and_request(:get, action, params, [:trait_abi])
+
+  def request("contract_events" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_id])
+
+  def request("contract_interface" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_address, :contract_name])
+
+  def request("specific_data_map_in_contract" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:contract_address, :contract_name, :map_name],
+      [],
+      []
     )
   end
 
-  def request("recent_microblocks", params) do
-    url = Helpers.node_url()
-    required_params = []
+  def request("contract_source" = action, params),
+    do: validate_and_request(:get, action, params, [:contract_address, :contract_name])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        HttpClient.endpoint_get_callback(url <> "/extended/v1/microblock?#{query_params}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("microblock", params) do
-    url = Helpers.node_url()
-    required_params = [:hash]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        hash = Map.get(params, :hash)
-
-        HttpClient.endpoint_get_callback(url <> "/extended/v1/microblock/#{hash}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transactions_in_unanchored_microblocks", _params) do
-    HttpClient.endpoint_get_callback(
-      Helpers.node_url() <> "/extended/v1/microblock/unanchored/txs"
+  def request("read_only_function" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:contract_address, :contract_name, :map_name],
+      [],
+      []
     )
   end
 
-  def request("namespace_price", params) do
-    url = Helpers.node_url()
-    required_params = [:tld]
+  def request("recent_transactions" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        tld = Map.get(params, :tld)
+  def request("mempool_transactions" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-        HttpClient.endpoint_get_callback(url <> "/v2/prices/namespaces/##{tld}")
+  def request("dropped_mempool_transactions" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("details_for_transactions" = action, params),
+    do: validate_and_request(:get, action, params, [:tx_id])
 
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("transaction" = action, params),
+    do: validate_and_request(:get, action, params, [:tx_id])
+
+  def request("raw_transaction" = action, params),
+    do: validate_and_request(:get, action, params, [:tx_id])
+
+  def request("transactions_by_block_hash" = action, params),
+    do: validate_and_request(:get, action, params, [:block_hash])
+
+  def request("transactions_by_block_height" = action, params),
+    do: validate_and_request(:get, action, params, [:block_height])
+
+  def request("transactions_by_address" = action, params),
+    do: validate_and_request(:get, action, params, [:address])
+
+  def request("transaction_events" = action, params),
+    do: validate_and_request(:get, action, params, [])
+
+  def request("sign_transaction" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :unsigned_transaction, :signatures],
+      [:network_identifier, :unsigned_transaction, :signatures],
+      []
+    )
   end
 
-  def request("name_price", params) do
-    url = Helpers.node_url()
-    required_params = [:name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        name = Map.get(params, :name)
-
-        HttpClient.endpoint_get_callback(url <> "/v2/prices/names/##{name}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("submit_signed_transaction" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:signed_transaction, :network_identifier],
+      [:signed_transaction, :network_identifier],
+      []
+    )
   end
 
-  def request("namespaces", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v1/namespaces")
+  def request("available_networks", _params),
+    do: HttpClient.endpoint_post_callback(Helpers.node_url() <> "/rosetta/v1/network/list", %{})
+
+  def request("network_options" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier],
+      [:network_identifier],
+      [:metadata]
+    )
   end
 
-  def request("namespace_names", params) do
-    url = Helpers.node_url()
-    required_params = [:tld]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        tld = Map.get(params, :tld)
-        query_params = params |> Helpers.format_query_params()
-
-        HttpClient.endpoint_get_callback(url <> "/v1/namespaces/##{tld}/names?#{query_params}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("network_status" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier],
+      [:network_identifier],
+      [:metadata]
+    )
   end
 
-  def request("names", _params) do
-    HttpClient.endpoint_get_callback(Helpers.node_url() <> "/v1/names")
+  def request("account_balance" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :account_identifier],
+      [:network_identifier, :account_identifier],
+      [:block_identifier]
+    )
   end
 
-  def request("name_details", params) do
-    url = Helpers.node_url()
-    required_params = [:name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        name = Map.get(params, :name)
-
-        HttpClient.endpoint_get_callback(url <> "/v1/names/#{name}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("block" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :block_identifier],
+      [:network_identifier, :block_identifier],
+      []
+    )
   end
 
-  def request("name_subdomains", params) do
-    url = Helpers.node_url()
-    required_params = [:name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        name = Map.get(params, :name)
-
-        HttpClient.endpoint_get_callback(url <> "/v1/names/#{name}/subdomains")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("block_transaction" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :block_identifier, :transaction_identifier],
+      [:network_identifier, :block_identifier, :transaction_identifier],
+      []
+    )
   end
 
-  def request("name_zonefile", params) do
-    url = Helpers.node_url()
-    required_params = [:name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        name = Map.get(params, :name)
-
-        HttpClient.endpoint_get_callback(url <> "/v1/names/#{name}/zonefile")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("mempool_transactions_rosetta" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier],
+      [:network_identifier],
+      [:metadata]
+    )
   end
 
-  def request("name_historical_zonefile", params) do
-    url = Helpers.node_url()
-    required_params = [:name, :zonefile_hash]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        name = Map.get(params, :name)
-        zonefile_hash = Map.get(params, :zonefile_hash)
-        HttpClient.endpoint_get_callback(url <> "/v1/names/#{name}/zonefile/#{zonefile_hash}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("mempool_transaction" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :transaction_identifier],
+      [:network_identifier, :transaction_identifier],
+      [:metadata]
+    )
   end
 
-  def request("names_owned_by_address", params) do
-    url = Helpers.node_url()
-    required_params = [:blockchain, :address]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        blockchain = Map.get(params, :blockchain)
-        address = Map.get(params, :address)
-        HttpClient.endpoint_get_callback(url <> "/v1/addresses/#{blockchain}/#{address}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("signed_transaction_hash" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :signed_transaction],
+      [:network_identifier, :signed_transaction],
+      []
+    )
   end
 
-  def request("nft_holdings", params) do
-    url = Helpers.node_url()
-    required_params = [:principal]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        HttpClient.endpoint_get_callback(
-          url <> "/extended/v1/tokens/nft/holdings?#{query_params}"
-        )
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
+  def request("transaction_construction_metadata" = action, params) do
+    validate_and_request(
+      :post,
+      action,
+      params,
+      [:network_identifier, :options],
+      [:network_identifier, :options],
+      [:public_key]
+    )
   end
 
-  def request("nft_history", params) do
-    url = Helpers.node_url()
-    required_params = [:asset_identifier, :value]
+  def request("search" = action, params), do: validate_and_request(:get, action, params, [:id])
 
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
+  def request("recent_reward_slot_holders" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-        HttpClient.endpoint_get_callback(url <> "/extended/v1/tokens/nft/history?#{query_params}")
+  def request("address_recent_reward_slot_holders" = action, params),
+    do: validate_and_request(:get, action, params, [:address])
 
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
+  def request("recent_reward_recipients" = action, params),
+    do: validate_and_request(:get, action, params, [])
 
-      false ->
-        {:error, :invalid_params}
-    end
-  end
+  def request("recipient_recent_rewards" = action, params),
+    do: validate_and_request(:get, action, params, [:address])
 
-  def request("nft_mints", params) do
-    url = Helpers.node_url()
-    required_params = [:asset_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        HttpClient.endpoint_get_callback(url <> "/extended/v1/tokens/nft/mints?#{query_params}")
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("nfts_metadata", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tokens/nft/metadata?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("nft_by_contract_id_metadata", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_id = Map.get(params, :contract_id)
-
-        url =
-          node_base_url <>
-            "/extended/v1/tokens/#{contract_id}/nft/metadata"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("contract_info", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_id = Map.get(params, :contract_id)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/contract/#{contract_id}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("contracts_by_trait", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:trait_abi]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/contract/by_trait?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("contract_events", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_id = Map.get(params, :contract_id)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/contract/#{contract_id}/events?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("contract_interface", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_address, :contract_name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_address = Map.get(params, :contract_address)
-        contract_name = Map.get(params, :contract_name)
-
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/v2/contracts/interface/#{contract_address}/#{contract_name}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("specific_data_map_in_contract", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_address, :contract_name, :map_name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_address = Map.get(params, :contract_address)
-        contract_name = Map.get(params, :contract_name)
-        map_name = Map.get(params, :map_name)
-
-        query_params =
-          Map.drop(params, required_params)
-          |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/v2/map_entry/#{contract_address}/#{contract_name}/#{map_name}?#{query_params}"
-
-        HttpClient.endpoint_post_callback(url, %{})
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("contract_source", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_address, :contract_name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_address = Map.get(params, :contract_address)
-        contract_name = Map.get(params, :contract_name)
-
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/v2/contracts/source/#{contract_address}/#{contract_name}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("read_only_function", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:contract_address, :contract_name, :function_name]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        contract_address = Map.get(params, :contract_address)
-        contract_name = Map.get(params, :contract_name)
-        function_name = Map.get(params, :function_name)
-
-        query_params =
-          Map.drop(params, required_params)
-          |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/v2/contracts/call-read/#{contract_address}/#{contract_name}/#{function_name}?#{query_params}"
-
-        HttpClient.endpoint_post_callback(url, %{})
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recent_transactions", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("mempool_transactions", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/mempool?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("dropped_mempool_transactions", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/mempool/dropped?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("details_for_transactions", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:tx_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/multiple?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:tx_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        tx_id = Map.get(params, :tx_id)
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/#{tx_id}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("raw_transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:tx_id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        tx_id = Map.get(params, :tx_id)
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/#{tx_id}/raw"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transactions_by_block_hash", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:block_hash]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        block_hash = Map.get(params, :block_hash)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/block/#{block_hash}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transactions_by_block_height", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:block_height]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        block_height = Map.get(params, :block_height)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/block_height/#{block_height}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transactions_by_address", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:address]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        address = Map.get(params, :address)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/address/#{address}/mempool?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transaction_events", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/tx/events?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("sign_transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :unsigned_transaction, :signatures]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        unsigned_transaction = Map.get(params, :unsigned_transaction)
-        signatures = Map.get(params, :signatures)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/construction/combine"
-
-        body = %{
-          network_identifier: network_identifier,
-          unsigned_transaction: unsigned_transaction,
-          signatures: signatures
-        }
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("submit_signed_transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:signed_transaction, :network_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        signed_transaction = Map.get(params, :signed_transaction)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/construction/submit"
-
-        body = %{
-          network_identifier: network_identifier,
-          signed_transaction: signed_transaction
-        }
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("available_networks", _params) do
-    HttpClient.endpoint_post_callback(Helpers.node_url() <> "/rosetta/v1/network/list", %{})
-  end
-
-  def request("network_options", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-
-        body =
-          %{"network_identifier" => network_identifier}
-          |> add_optional_param(params, :metadata)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/network/options"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("network_status", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-
-        body =
-          %{"network_identifier" => network_identifier}
-          |> add_optional_param(params, :metadata)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/network/status"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("account_balance", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :account_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        account_identifier = Map.get(params, :account_identifier)
-
-        body =
-          %{
-            "network_identifier" => network_identifier,
-            "account_identifier" => account_identifier
-          }
-          |> add_optional_param(params, :block_identifier)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/account/balance"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :block_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        block_identifier = Map.get(params, :block_identifier)
-
-        body = %{
-          "network_identifier" => network_identifier,
-          "block_identifier" => block_identifier
-        }
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/block"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("block_transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :block_identifier, :transaction_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        block_identifier = Map.get(params, :block_identifier)
-        transaction_identifier = Map.get(params, :transaction_identifier)
-
-        body = %{
-          "network_identifier" => network_identifier,
-          "block_identifier" => block_identifier,
-          "transaction_identifier" => transaction_identifier
-        }
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/block/transaction"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("mempool_transactions_rosetta", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-
-        body =
-          %{
-            "network_identifier" => network_identifier
-          }
-          |> add_optional_param(params, :metadata)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/mempool"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("mempool_transaction", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :transaction_identifier]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        transaction_identifier = Map.get(params, :transaction_identifier)
-
-        body = %{
-          "transaction_identifier" => transaction_identifier,
-          "network_identifier" => network_identifier
-        }
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/mempool/transaction"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("signed_transaction_hash", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :signed_transaction]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        signed_transaction = Map.get(params, :signed_transaction)
-
-        body = %{
-          "network_identifier" => network_identifier,
-          "signed_transaction" => signed_transaction
-        }
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/construction/hash"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("transaction_construction_metadata", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:network_identifier, :options]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        network_identifier = Map.get(params, :network_identifier)
-        options = Map.get(params, :options)
-
-        body =
-          %{
-            "network_identifier" => network_identifier,
-            "options" => options
-          }
-          |> add_optional_param(params, :public_key)
-
-        url =
-          node_base_url <>
-            "/rosetta/v1/construction/metadata"
-
-        HttpClient.endpoint_post_callback(url, body)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("search", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:id]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        id = Map.get(params, :id)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/search/#{id}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recent_reward_slot_holders", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/burnchain/reward_slot_holders?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("address_recent_reward_slot_holders", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:address]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        address = Map.get(params, :address)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/burnchain/reward_slot_holders/#{address}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recent_reward_recipients", params) do
-    node_base_url = Helpers.node_url()
-    required_params = []
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        query_params = params |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/burnchain/rewards?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recipient_recent_rewards", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:address]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        address = Map.get(params, :address)
-        query_params = Map.drop(params, required_params) |> Helpers.format_query_params()
-
-        url =
-          node_base_url <>
-            "/extended/v1/burnchain/rewards/#{address}?#{query_params}"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
-
-  def request("recipient_total_rewards", params) do
-    node_base_url = Helpers.node_url()
-    required_params = [:address]
-
-    case required_params_available?(params, required_params) do
-      {true, params} ->
-        address = Map.get(params, :address)
-
-        url =
-          node_base_url <>
-            "/extended/v1/burnchain/rewards/#{address}/total"
-
-        HttpClient.endpoint_get_callback(url)
-
-      {false, missing_params} ->
-        {:error, :missing_required_params, missing_params}
-
-      false ->
-        {:error, :invalid_params}
-    end
-  end
+  def request("recipient_total_rewards" = action, params),
+    do: validate_and_request(:get, action, params, [:address])
 
   def request(_, _) do
     {:error, :unsupported_name}
@@ -1832,12 +566,12 @@ defmodule ExStacks.StacksAPI do
 
   ## Available Events with their parameters:
 
-      - ``block``, no parameters - Subscribes to newly mined block events
-      - ``microblock``, no parameters - Subscribes to newly streamed microblocks events
-      - ``mempool``, no parameters - Subscribes to new transaction added to mempool events
-      - ``tx_updates``, parameters: ``:tx_id`` - Subscribes to new updates to this specific transaction
-      - ``address_tx_updates``, parameters: ``:address`` - Subscribes to new updates to transactions for this specific address
-      - ``address_balance_update``, parameters: ``:address`` - Subscribes to new updates to this specific address' balance
+      - ``block``, no parameters - Unsubscribes from newly mined block events
+      - ``microblock``, no parameters - Unsubscribes from newly streamed microblocks events
+      - ``mempool``, no parameters - Unsubscribes from new transaction added to mempool events
+      - ``tx_updates``, parameters: ``:tx_id`` - Unsubscribes from new updates to this specific transaction
+      - ``address_tx_updates``, parameters: ``:address`` - Unsubscribes from new updates to transactions for this specific address
+      - ``address_balance_update``, parameters: ``:address`` - Unsubscribes from new updates to this specific address' balance
 
   ## Returns
 
@@ -1894,4 +628,165 @@ defmodule ExStacks.StacksAPI do
   end
 
   def unsubscribe(_, _), do: {:error, :invalid_input}
+
+  defp validate_and_request(:get, action, params, required_params) do
+    case required_params_available?(params, required_params) do
+      {true, params} ->
+        HttpClient.endpoint_get_callback(url(action, params))
+
+      {false, missing_params} ->
+        {:error, :missing_required_params, missing_params}
+
+      false ->
+        {:error, :invalid_params}
+    end
+  end
+
+  defp validate_and_request(
+         :post,
+         action,
+         params,
+         required_params,
+         required_body_params,
+         optional_body_params
+       ) do
+    case required_params_available?(params, required_params) do
+      {true, params} ->
+        body =
+          Enum.reduce(required_body_params, %{}, fn required_param, acc ->
+            Map.merge(acc, %{Atom.to_string(required_param) => Map.get(params, required_param)})
+          end)
+
+        body =
+          Enum.reduce(optional_body_params, body, fn optional_param, acc ->
+            acc |> add_optional_param(params, optional_param)
+          end)
+
+        HttpClient.endpoint_post_callback(url(action, params), body)
+
+      {false, missing_params} ->
+        {:error, :missing_required_params, missing_params}
+
+      false ->
+        {:error, :invalid_params}
+    end
+  end
+
+  def url(action, params \\ %{}) do
+    urls = %{
+      "account_balances" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/balances?#{query_params(params, [:principal])}",
+      "account_stx_balance" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/stx?#{query_params(params, [:principal])}",
+      "account_transactions" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/transactions?#{query_params(params, [:principal])}}",
+      "account_transactions_with_transfers" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/transactions_with_transfers?#{query_params(params, [:principal])}}",
+      "account_transaction_by_id" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/#{Map.get(params, :tx_id)}/with_transfers?#{query_params(params, [:principal, :tx_id])}",
+      "account_nonces" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/nonces?#{query_params(params, [:principal])}",
+      "account_stx_inbound" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}}/stx_inbound?#{query_params(params, [:principal])}",
+      "account_assets" =>
+        "/extended/v1/address/#{Map.get(params, :principal)}/assets?#{query_params(params, [:principal])}",
+      "account_information" =>
+        "/v2/#{Map.get(params, :principal)}?#{query_params(params, [:principal])}",
+      "recent_blocks" => "/extended/v1/block?#{query_params(params, [])}",
+      "block_by_hash" =>
+        "/extended/v1/block/#{Map.get(params, :hash)}?#{query_params(params, [:hash])}",
+      "block_by_height" =>
+        "/extended/v1/block/by_height/#{Map.get(params, :height)}?#{query_params(params, [:height])}",
+      "block_by_burnchain_height" =>
+        "/extended/v1/block/by_burn_block_height/#{Map.get(params, :burn_block_height)}?#{query_params(params, [:burn_block_height])}",
+      "block_by_burnchain_hash" =>
+        "/extended/v1/block/by_burn_block_hash/#{Map.get(params, :burn_block_hash)}?#{query_params(params, [:burn_block_hash])}",
+      "estimated_stx_transfer_transaction_fee" => "/v2/fees/transfer",
+      "fts_metadata" => "/extended/v1/tokens/ft/metadata?#{query_params(params, [])}",
+      "ft_by_contract_id_metadata" =>
+        "/extended/v1/tokens/#{Map.get(params, :contract_id)}/ft/metadata",
+      "given_network_block_time" =>
+        "/extended/v1/info/network_block_time/#{Map.get(params, :network)}",
+      "stx_supply" => "/extended/v1/stx_supply?#{query_params(params, [])}",
+      "legacy_stx_supply" => "/extended/v1/stx_supply/legacy_format?#{query_params(params, [])}",
+      "recent_microblocks" => "/extended/v1/microblock?#{query_params(params, [])}",
+      "microblock" => "/extended/v1/microblock/#{Map.get(params, :hash)}",
+      "namespace_price" => "/v2/prices/namespaces/##{Map.get(params, :tld)}",
+      "name_price" => "/v2/prices/names/##{Map.get(params, :name)}",
+      "namespace_names" =>
+        "/v1/namespaces/##{Map.get(params, :tld)}/names?#{query_params(params, [:tld])}",
+      "name_details" => "/v1/names/#{Map.get(params, :name)}",
+      "name_subdomains" => "/v1/names/#{Map.get(params, :name)}/subdomains",
+      "name_zonefile" => "/v1/names/#{Map.get(params, :name)}/zonefile",
+      "name_historical_zonefile" =>
+        "/v1/names/#{Map.get(params, :name)}/zonefile/#{Map.get(params, :zonefile_hash)}",
+      "names_owned_by_address" =>
+        "/v1/addresses/#{Map.get(params, :blockchain)}/#{Map.get(params, :address)}",
+      "nft_holdings" => "/extended/v1/tokens/nft/holdings?#{query_params(params, [])}",
+      "nft_history" => "/extended/v1/tokens/nft/history?#{query_params(params, [])}",
+      "nft_mints" => "/extended/v1/tokens/nft/mints?#{query_params(params, [])}",
+      "nfts_metadata" => "/extended/v1/tokens/nft/metadata?#{query_params(params, [])}",
+      "nft_by_contract_id_metadata" =>
+        "/extended/v1/tokens/#{Map.get(params, :contract_id)}/nft/metadata",
+      "contract_info" =>
+        "/extended/v1/contract/#{Map.get(params, :contract_id)}?#{query_params(params, [:contract_id])}",
+      "contracts_by_trait" => "/extended/v1/contract/by_trait?#{query_params(params, [])}",
+      "contract_events" =>
+        "/extended/v1/contract/#{Map.get(params, :contract_id)}/events?#{query_params(params, [:contract_id])}",
+      "contract_interface" =>
+        "/v2/contracts/interface/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}?#{query_params(params, [:contract_address, :contract_name])}",
+      "contract_source" =>
+        "/v2/contracts/source/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}?#{query_params(params, [:contract_address, :contract_name])}",
+      "recent_transactions" => "/extended/v1/tx?#{query_params(params, [])}",
+      "mempool_transactions" => "/extended/v1/tx/mempool?#{query_params(params, [])}",
+      "dropped_mempool_transactions" =>
+        "/extended/v1/tx/mempool/dropped?#{query_params(params, [])}",
+      "details_for_transactions" => "/extended/v1/tx/multiple?#{query_params(params, [])}",
+      "transaction" => "/extended/v1/tx/#{Map.get(params, :tx_id)}",
+      "raw_transaction" => "/extended/v1/tx/#{Map.get(params, :tx_id)}/raw",
+      "transactions_by_block_hash" =>
+        "/extended/v1/tx/block/#{Map.get(params, :block_hash)}?#{query_params(params, [:block_hash])}",
+      "transactions_by_block_height" =>
+        "/extended/v1/tx/block_height/#{Map.get(params, :block_height)}?#{query_params(params, [:block_height])}",
+      "transactions_by_address" =>
+        "/extended/v1/address/#{Map.get(params, :address)}/mempool?#{query_params(params, [:address])}",
+      "transaction_events" => "/extended/v1/tx/events?#{query_params(params, [])}",
+      "search" => "/extended/v1/search/#{Map.get(params, :id)}?#{query_params(params, [:id])}",
+      "recent_reward_slot_holders" =>
+        "/extended/v1/burnchain/reward_slot_holders?#{query_params(params, [])}",
+      "address_recent_reward_slot_holders" =>
+        "/extended/v1/burnchain/reward_slot_holders/#{Map.get(params, :address)}?#{query_params(params, [:address])}",
+      "recent_reward_recipients" => "/extended/v1/burnchain/rewards?#{query_params(params, [])}",
+      "recipient_recent_rewards" =>
+        "/extended/v1/burnchain/rewards/#{Map.get(params, :address)}?#{query_params(params, [:address])}",
+      "recipient_total_rewards" =>
+        "/extended/v1/burnchain/rewards/#{Map.get(params, :address)}/total",
+      "transaction_construction_metadata" => "/rosetta/v1/construction/metadata",
+      "signed_transaction_hash" => "/rosetta/v1/construction/hash",
+      "estimated_transaction_fee" => "/v2/fees/transaction",
+      "specific_data_map_in_contract" =>
+        "/v2/map_entry/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}/#{Map.get(params, :map_name)}?#{query_params(params, [:contract_address, :contract_name, :map_name])}",
+      "read_only_function" =>
+        "/v2/contracts/call-read/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}/#{Map.get(params, :function_name)}?#{query_params(params, [:contract_address, :contract_name, :map_name])}",
+      "sign_transaction" => "/rosetta/v1/construction/combine",
+      "submit_signed_transaction" => "/rosetta/v1/construction/submit",
+      "network_options" => "/rosetta/v1/network/options",
+      "network_status" => "/rosetta/v1/network/status",
+      "account_balance" => "/rosetta/v1/account/balance",
+      "block" => "/rosetta/v1/block",
+      "block_transaction" => "/rosetta/v1/block/transaction",
+      "mempool_transactions_rosetta" => "/rosetta/v1/mempool",
+      "mempool_transaction" => "/rosetta/v1/mempool/transaction"
+    }
+
+    Helpers.node_url() <> Map.get(urls, action)
+  end
+
+  defp query_params(params, []) do
+    params
+  end
+
+  defp query_params(params, neglected_fields) do
+    Map.drop(params, neglected_fields) |> Helpers.format_query_params()
+  end
 end

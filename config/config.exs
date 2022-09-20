@@ -7,13 +7,6 @@
 # General application configuration
 import Config
 
-# Configures the endpoint
-config :ex_stacks, ExStacksWeb.Endpoint,
-  url: [host: "localhost"],
-  render_errors: [view: ExStacksWeb.ErrorView, accepts: ~w(json), layout: false],
-  pubsub_server: ExStacks.PubSub,
-  live_view: [signing_salt: "rH+2M5CZ"]
-
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.14.0",

@@ -4,7 +4,6 @@ defmodule ExStacks.Application do
   @moduledoc false
 
   use Application
-  alias ExStacks.Helpers
   @impl true
   def start(_type, _args) do
     children = [
@@ -21,8 +20,7 @@ defmodule ExStacks.Application do
         ExStacksWeb.Telemetry,
         # Start the PubSub system
         {Phoenix.PubSub, name: ExStacks.PubSub}
-        # Start the Endpoint (http/https)
-        # ExStacksWeb.Endpoint,
+
         # Start a worker by calling: ExStacks.Worker.start_link(arg)
         # {ExStacks.Worker, arg}
       ],
@@ -32,11 +30,8 @@ defmodule ExStacks.Application do
     res
   end
 
-  # Tell Phoenix to update the endpoint configuration
-  # whenever the application is updated.
   @impl true
-  def config_change(changed, _new, removed) do
-    ExStacksWeb.Endpoint.config_change(changed, removed)
+  def config_change(_changed, _new, _removed) do
     :ok
   end
 end
