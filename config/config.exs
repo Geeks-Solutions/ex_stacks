@@ -14,16 +14,6 @@ config :ex_stacks, ExStacksWeb.Endpoint,
   pubsub_server: ExStacks.PubSub,
   live_view: [signing_salt: "rH+2M5CZ"]
 
-# Configure esbuild (the version is required)
-config :esbuild,
-  version: "0.14.0",
-  default: [
-    args:
-      ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
-    cd: Path.expand("../assets", __DIR__),
-    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
-  ]
-
 # Configures Elixir's Logger
 config :logger, :console,
   format: "$time $metadata[$level] $message\n",
