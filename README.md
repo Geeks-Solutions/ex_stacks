@@ -16,6 +16,8 @@ ExStacks is a library that serves as a interface to integrate Stacks Blockchain 
  node_ws_url: "your_optional_node_websocket_url"
  ```
 
+- You can use [Hiro](https://docs.hiro.so/get-started/stacks-blockchain-api)'s mainnet or testnet node URLs in case you do not have your own node access
+
 # Usage
 
 As of now, the following Stacks Blockchain API actions are supported:
