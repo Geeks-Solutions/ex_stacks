@@ -34,7 +34,6 @@ defmodule ExStacks.MixProject do
   defp deps do
     [
       {:phoenix, "~> 1.6.6"},
-      {:esbuild, "~> 0.3", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:jason, "~> 1.2"},
@@ -55,8 +54,7 @@ defmodule ExStacks.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
-      setup: ["deps.get"],
-      "assets.deploy": ["esbuild default --minify", "phx.digest"]
+      setup: ["deps.get"]
     ]
   end
 end
