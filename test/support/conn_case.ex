@@ -25,9 +25,6 @@ defmodule ExStacksWeb.ConnCase do
       import ExStacksWeb.ConnCase
 
       alias ExStacksWeb.Router.Helpers, as: Routes
-
-      # The default endpoint for testing
-      @endpoint ExStacksWeb.Endpoint
     end
   end
 

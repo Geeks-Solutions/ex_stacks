@@ -22,9 +22,6 @@ defmodule ExStacksWeb.ChannelCase do
       # Import conveniences for testing with channels
       import Phoenix.ChannelTest
       import ExStacksWeb.ChannelCase
-
-      # The default endpoint for testing
-      @endpoint ExStacksWeb.Endpoint
     end
   end
 
