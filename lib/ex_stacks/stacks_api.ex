@@ -312,8 +312,8 @@ defmodule ExStacks.StacksAPI do
       :post,
       action,
       params,
-      [:contract_address, :contract_name, :map_name],
-      [],
+      [:contract_address, :contract_name, :function_name, :sender, :arguments],
+      [:sender, :arguments],
       []
     )
   end
@@ -508,54 +508,73 @@ defmodule ExStacks.StacksAPI do
   ## Returns
 
       Returns an ``:ok`` confirming the message has been relayed.
+
+  ## How it works
+    - All events require atleast one host project process to be present in ExStacks' WebSocketClient process list.
+    - All events will be relayed to all the processes, therefore you will need to pattern match the event you'd like to handle
+    - The format of an event will be a tuple, the first element(s) of the tuple will be to identify the event:
+      - {:block, event}
+      - {:microblock, event}
+      - {:mempool, event}
+      - {:tx_update, event}
+      - {:address_tx_update, event}
+      - {:address_balance_update, event}
+    - To register a new process to receive events, include in the subscription parameters the key/value pair: %{pid: #PID<1.2.3>}
+
   """
   def subscribe(method, params \\ %{})
 
-  def subscribe("block", _params) do
+  def subscribe("block", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "subscribe", event: "block"})
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "block"}),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
-  def subscribe("microblock", _params) do
+  def subscribe("microblock", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "subscribe", event: "microblock"})
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "microblock"}),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
-  def subscribe("mempool", _params) do
+  def subscribe("mempool", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "subscribe", event: "mempool"})
+      Helpers.format_websocket_frame(%{method: "subscribe", event: "mempool"}),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
-  def subscribe("tx_update", %{tx_id: transaction_id}) do
+  def subscribe("tx_update", %{tx_id: transaction_id} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "subscribe",
         event: "tx_update",
         tx_id: transaction_id
-      })
+      }),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
-  def subscribe("address_tx_update", %{address: address}) do
+  def subscribe("address_tx_update", %{address: address} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "subscribe",
         event: "address_tx_update",
         address: address
-      })
+      }),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
-  def subscribe("address_balance_update", %{address: address}) do
+  def subscribe("address_balance_update", %{address: address} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "subscribe",
         event: "address_balance_update",
         address: address
-      })
+      }),
+      Helpers.format_subscription_metadata("subscribe", params)
     )
   end
 
@@ -576,54 +595,63 @@ defmodule ExStacks.StacksAPI do
   ## Returns
 
       Returns an ``:ok`` confirming the message has been relayed.
+
+  ## How it works
+    - To unregister a process to stop receiving events on it, include in the unsubscription parameters the key/value pair: %{pid: #PID<1.2.3>}
   """
   def unsubscribe(method, params \\ %{})
 
-  def unsubscribe("block", _params) do
+  def unsubscribe("block", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "block"})
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "block"}),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
-  def unsubscribe("microblock", _params) do
+  def unsubscribe("microblock", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "microblock"})
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "microblock"}),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
-  def unsubscribe("mempool", _params) do
+  def unsubscribe("mempool", params) when is_map(params) do
     WebSocketClient.send_frame(
-      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "mempool"})
+      Helpers.format_websocket_frame(%{method: "unsubscribe", event: "mempool"}),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
-  def unsubscribe("tx_update", %{tx_id: transaction_id}) do
+  def unsubscribe("tx_update", %{tx_id: transaction_id} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "unsubscribe",
         event: "tx_update",
         tx_id: transaction_id
-      })
+      }),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
-  def unsubscribe("address_tx_update", %{address: address}) do
+  def unsubscribe("address_tx_update", %{address: address} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "unsubscribe",
         event: "address_tx_update",
         address: address
-      })
+      }),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
-  def unsubscribe("address_balance_update", %{address: address}) do
+  def unsubscribe("address_balance_update", %{address: address} = params) do
     WebSocketClient.send_frame(
       Helpers.format_websocket_frame(%{
         method: "unsubscribe",
         event: "address_balance_update",
         address: address
-      })
+      }),
+      Helpers.format_subscription_metadata("unsubscribe", params)
     )
   end
 
@@ -687,11 +715,11 @@ defmodule ExStacks.StacksAPI do
       "account_nonces" =>
         "/extended/v1/address/#{Map.get(params, :principal)}/nonces?#{query_params(params, [:principal])}",
       "account_stx_inbound" =>
-        "/extended/v1/address/#{Map.get(params, :principal)}}/stx_inbound?#{query_params(params, [:principal])}",
+        "/extended/v1/address/#{Map.get(params, :principal)}/stx_inbound?#{query_params(params, [:principal])}",
       "account_assets" =>
         "/extended/v1/address/#{Map.get(params, :principal)}/assets?#{query_params(params, [:principal])}",
       "account_information" =>
-        "/v2/#{Map.get(params, :principal)}?#{query_params(params, [:principal])}",
+        "/v2/accounts/#{Map.get(params, :principal)}?#{query_params(params, [:principal])}",
       "recent_blocks" => "/extended/v1/block?#{query_params(params, [])}",
       "block_by_hash" =>
         "/extended/v1/block/#{Map.get(params, :hash)}?#{query_params(params, [:hash])}",
@@ -711,10 +739,10 @@ defmodule ExStacks.StacksAPI do
       "legacy_stx_supply" => "/extended/v1/stx_supply/legacy_format?#{query_params(params, [])}",
       "recent_microblocks" => "/extended/v1/microblock?#{query_params(params, [])}",
       "microblock" => "/extended/v1/microblock/#{Map.get(params, :hash)}",
-      "namespace_price" => "/v2/prices/namespaces/##{Map.get(params, :tld)}",
-      "name_price" => "/v2/prices/names/##{Map.get(params, :name)}",
+      "namespace_price" => "/v2/prices/namespaces/#{Map.get(params, :tld)}",
+      "name_price" => "/v2/prices/names/#{Map.get(params, :name)}",
       "namespace_names" =>
-        "/v1/namespaces/##{Map.get(params, :tld)}/names?#{query_params(params, [:tld])}",
+        "/v1/namespaces/#{Map.get(params, :tld)}/names?#{query_params(params, [:tld])}",
       "name_details" => "/v1/names/#{Map.get(params, :name)}",
       "name_subdomains" => "/v1/names/#{Map.get(params, :name)}/subdomains",
       "name_zonefile" => "/v1/names/#{Map.get(params, :name)}/zonefile",
@@ -767,7 +795,7 @@ defmodule ExStacks.StacksAPI do
       "specific_data_map_in_contract" =>
         "/v2/map_entry/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}/#{Map.get(params, :map_name)}?#{query_params(params, [:contract_address, :contract_name, :map_name])}",
       "read_only_function" =>
-        "/v2/contracts/call-read/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}/#{Map.get(params, :function_name)}?#{query_params(params, [:contract_address, :contract_name, :map_name])}",
+        "/v2/contracts/call-read/#{Map.get(params, :contract_address)}/#{Map.get(params, :contract_name)}/#{Map.get(params, :function_name)}?#{query_params(params, [:contract_address, :contract_name, :function_name])}",
       "sign_transaction" => "/rosetta/v1/construction/combine",
       "submit_signed_transaction" => "/rosetta/v1/construction/submit",
       "network_options" => "/rosetta/v1/network/options",
@@ -783,7 +811,7 @@ defmodule ExStacks.StacksAPI do
   end
 
   defp query_params(params, []) do
-    params
+    params |> Helpers.format_query_params()
   end
 
   defp query_params(params, neglected_fields) do

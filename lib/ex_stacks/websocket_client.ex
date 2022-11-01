@@ -10,13 +10,42 @@ defmodule ExStacks.WebSocketClient do
     WebSockex.start_link(url, __MODULE__, state, name: __MODULE__)
   end
 
-  def send_frame(frame) do
+  def send_frame(frame, %{event: event, pid: pid}) do
     start_child_if_not_started()
+
+    cond do
+      is_pid(pid) and event == "subscribe" ->
+        # add pid to the list of pids subscribed to watch for events
+
+        :ets.insert(
+          :subscribed_processes,
+          {:processes, (get_process_list() ++ [pid]) |> Enum.uniq()}
+        )
+
+      is_pid(pid) and event == "unsubscribe" ->
+        # remove pid from the list of pids subscribed to watch for events
+
+        :ets.insert(
+          :subscribed_processes,
+          {:processes, get_process_list() -- [pid]}
+        )
+
+      true ->
+        # do nothing
+        nil
+    end
 
     WebSockex.send_frame(
       __MODULE__,
       {:text, frame}
     )
+  end
+
+  defp get_process_list do
+    case :ets.lookup(:subscribed_processes, :processes) do
+      [] -> []
+      [{:processes, list}] -> list
+    end
   end
 
   defp start_child_if_not_started do
@@ -46,6 +75,23 @@ defmodule ExStacks.WebSocketClient do
   @doc false
   def handle_disconnect(_connection_status_map, state) do
     Logger.warn("You have disconnected from Stacks WebSocket Server.")
+    {:ok, state}
+  end
+
+  @impl WebSockex
+  @doc false
+  def handle_frame({:text, msg}, state) do
+    case Poison.decode!(msg) do
+      %{"method" => method} = message ->
+        Enum.each(get_process_list(), fn process ->
+          send(process, {method |> String.to_atom(), message})
+        end)
+
+      _message ->
+        # subscribtion and unsusbcription events
+        nil
+    end
+
     {:ok, state}
   end
 

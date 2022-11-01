@@ -79,8 +79,8 @@ defmodule ExStacks.HttpClient do
       {:ok, response} ->
         fetch_response_body(response)
 
-      {:error, _error} ->
-        {:error, "users credentials server error"}
+      {:error, error} ->
+        {:error, error}
     end
   end
 
