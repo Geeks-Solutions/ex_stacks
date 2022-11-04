@@ -10,6 +10,9 @@ defmodule ExStacks.Application do
       {DynamicSupervisor, name: ExStacks.DynamicSupervisor, strategy: :one_for_one}
     ]
 
+    # create ETS table to handle subscribed processes
+    :ets.new(:subscribed_processes, [:set, :public, :named_table])
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: ExStacks.Supervisor]

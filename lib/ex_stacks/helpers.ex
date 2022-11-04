@@ -85,8 +85,13 @@ defmodule ExStacks.Helpers do
 
   def format_query_params(map) do
     Enum.map(map, fn
-      {k, v} when is_atom(k) -> "#{Atom.to_string(k)}=#{v}"
-      {k, v} -> "#{k}=#{v}"
+      {k, v} when is_atom(k) and is_binary(v) -> "#{Atom.to_string(k)}=#{v}"
+      {k, v} when is_binary(v) -> "#{k}=#{v}"
+      _ -> nil
+    end)
+    |> Enum.reject(fn
+      nil -> true
+      _ -> false
     end)
     |> Enum.join("&")
   end
@@ -99,5 +104,9 @@ defmodule ExStacks.Helpers do
       id: method
     }
     |> Poison.encode!()
+  end
+
+  def format_subscription_metadata(event, params) do
+    %{event: event, pid: Map.get(params, :pid)}
   end
 end
