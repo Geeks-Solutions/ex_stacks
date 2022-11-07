@@ -2,6 +2,7 @@ defmodule ExStacks.HttpClient do
   @moduledoc """
   HTTP Client for the library that handles relaying HTTP requests.
   """
+  @moduledoc false
 
   @doc """
     Sends a GET request.

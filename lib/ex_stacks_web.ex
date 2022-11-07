@@ -16,6 +16,7 @@ defmodule ExStacksWeb do
   below. Instead, define any helper function in modules
   and import those modules here.
   """
+  @moduledoc false
 
   def controller do
     quote do

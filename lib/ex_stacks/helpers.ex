@@ -2,6 +2,7 @@ defmodule ExStacks.Helpers do
   @moduledoc """
   Helper functions for the library
   """
+  @moduledoc false
 
   @doc """
     Used to retrieve an environment variable from the :ex_stacks otp_app config.

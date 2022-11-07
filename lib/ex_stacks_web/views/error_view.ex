@@ -1,5 +1,6 @@
 defmodule ExStacksWeb.ErrorView do
   use ExStacksWeb, :view
+  @moduledoc false
 
   # If you want to customize a particular status code
   # for a certain format, you may uncomment below.

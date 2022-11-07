@@ -6,7 +6,7 @@ ExStacks is a library that serves as a interface to integrate Stacks Blockchain 
 
 # Setup
 
-1. Add ex_auth to you `mix.exs`
+1. Add ex_stacks to you `mix.exs`
 2. Retrieve your desired node base URL - `required`
 3. In case you want to receive event updates directly from the blockchain through the websocket, you need the websocket base url - `optional`
 4. Add the following config to your configuration file:

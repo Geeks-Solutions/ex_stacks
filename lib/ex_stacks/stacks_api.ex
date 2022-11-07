@@ -1,6 +1,8 @@
 defmodule ExStacks.StacksAPI do
   @moduledoc """
   This module is responsible of communicating with the Stacks Blockchain
+
+  Function param atom keys are the same as the [API Docs](https://docs.hiro.so/api), however they must be snake cased.
   """
   alias ExStacks.{Helpers, HttpClient, WebSocketClient}
 
@@ -32,85 +34,85 @@ defmodule ExStacks.StacksAPI do
     Used to hit the Stacks API.
 
   ## Available API Calls (case sensitive)
-      - ``account_balances`` - Get Account Balances
-      - ``account_stx_balance`` - Get Account STX Balance
-      - ``account_transactions`` - Get Account Transactions
-      - ``account_transactions_with_transfers`` - Get Account Transactions including STX Transfers for each transaction
-      - ``account_transaction_by_id`` - Get Account Transaction information for a specific transaction
-      - ``account_nonces`` - Get the latest nonce used by an account
-      - ``account_stx_inbound`` - Get the account's inbound STX Transfers
-      - ``account_information`` - Get the account's information
-      - ``recent_blocks`` - Get the list of recently mined blocks
-      - ``block_by_hash`` - Get a block by its hash
-      - ``block_by_height`` - Get a block by its height
-      - ``block_by_burnchain_hash`` - Get a block by the given burnchain block hash
-      - ``block_by_burnchain_height`` - Get a block by the given burnchain block height
-      - ``estimated_stx_transfer_transaction_fee`` - Get the estimated fee rate for STX Transfers
-      - ``estimated_transaction_fee`` - Get the approximate fee for the supplied transaction.
-      - ``fts_metadata`` - Get a list of fungible tokens with their metadata
-      - ``ft_by_contract_id_metadata`` - Get the metadata for fungible tokens for a given contract ID.
-      - ``core_api_info`` - Get the Core API information
-      - ``api_status`` - Get the API Status
-      - ``network_block_time`` - Get a network target block time
-      - ``proof_of_transfer_details`` - Get PoX information.
-      - ``given_network_block_time`` - Get the given network target block time.
-      - ``stx_supply`` - Get the total and unlocked STX Supply
-      - ``legacy_stx_supply`` - Get the total and unlocked STX Supply with the results formatted for the legacy 1.0 API
-      - ``total_stx_supply_plain_text`` - Get the total STX supply as plain text
-      - ``circulating_stx_supply_plain_text`` - Get the circulating STX supply as plain text.
-      - ``recent_microblocks`` - Get the recent microblocks details.
-      - ``microblock`` - Get a microblock by its hash.
-      - ``transactions_in_unanchored_microblocks`` - Get the list of transactions that belong to an unanchored microblock.
-      - ``namespace_price`` - Get the price of a specific namespace
-      - ``name_price`` - Get the price of a specific name
-      - ``namespaces`` - Get all namespaces
-      - ``namespace_names`` - Get all names that belong to a specific namespace
-      - ``names`` - Get all the names that are known to the target node.
-      - ``name_details`` - Get the details of a specific name.
-      - ``name_subdomains`` - Get the subdomains of a name.
-      - ``name_zonefile`` - Get the zonefile of a name.
-      - ``name_historical_zonefile`` - Get the historical zonefile of a name.
-      - ``names_owned_by_address`` - Get all the names owned by a specific address.
-      - ``nfts_metadata`` - Get a list of NFTs with their metadata
-      - ``nft_holdings`` - Get all the NFT owned by a given address.
-      - ``nft_history`` - Get all the relevant events for a given NFT.
-      - ``nft_mints`` - Get all the mint events for a specific NFT asset class.
-      - ``nft_by_contract_id_metadata`` - Get the metadata for NFTs belonging to a contract ID.
-      - ``contract_info`` - Get a contract's information
-      - ``contracts_by_trait`` - Get the list of contracts based on specific traits.
-      - ``contract_events`` - Get the events triggered by a contract.
-      - ``contract_interface`` - Get a contract's interface
-      - ``specific_data_map_in_contract`` - Get a contract's data from a specific data map.
-      - ``contract_source`` - Get the contract's Clarity source code.
-      - ``read_only_function`` - Call a read-only public function in a specific smart contract.
-      - ``recent_transactions`` - Get the list of recently mined transactions.
-      - ``mempool_transactions`` - Get all recently broadcasted transactions to the mempool.
-      - ``dropped_mempool_transactions`` - Get all recently broadcasted transactions to the mempool that have been dropped.
-      - ``details_for_transactions`` - Get a list of transactions using an array of the transaction IDs.
-      - ``transaction`` - Get a transaction by its ID.
-      - ``raw_transaction`` - Get a raw transaction by its ID. (hex encoded)
-      - ``transactions_by_block_hash`` - Get all transactions in a mined block by the block hash.
-      - ``transactions_by_block_height`` - Get all transactions in a mined block by the block height.
-      - ``transactions_by_address`` - Get all the transactions for a given address that are currently in the mempool.
-      - ``transaction_events`` - Get a list of transaction events.
-      - ``sign_transaction`` - Returns the signed transaction version of an unsigned transaction payload.
-      - ``submit_signed_transaction`` - Submit a signed transaction to the node.
-      - ``available_networks`` - Get the list of NetworkIdentifiers supported by the Rosetta Server.
-      - ``network_options`` - Get the version information and allowed network-speciifc types for a given network ID.
-      - ``network_status`` - Get a given network's status.
-      - ``account_balance`` - Get an account balance in a given network.
-      - ``block`` - Get a block and its transactions by its ID in a given network.
-      - ``block_transaction`` - Get a a transaction by its ID in a given network and block IDs.
-      - ``mempool_transactions_rosetta`` - Get the list of transactions currently in the mempool of a given network.
-      - ``mempool_transaction`` - Get a mempool transaction by its ID in a given network
-      - ``signed_transaction_hash`` - Get a network-specific transaction hash for a signed transaction.
-      - ``transaction_construction_metadata`` - Get the metadata for a transaction consturction.
-      - ``search`` - Search anything in the blockchain - blocks, transactions, contracts or accounts by a hash or an ID.
-      - ``recent_reward_slot_holders`` - Get the list of Bitcoin addresses that would receive PoX commitments
-      - ``address_recent_reward_slot_holders`` - Get the list of Bitcoin addresses that would receive PoX commitments for a given recipient address
-      - ``recent_reward_recipients`` - Get the list of recent burnchain reward recipients.
-      - ``recipient_recent_rewards`` - Get the list of recent burnchain rewards for a given recipient
-      - ``recipient_total_rewards`` - Get the list of total burnchain rewards for a given recipient
+      - account_balance - Get an account balance in a given network.
+      - account_balances - Get Account Balances
+      - account_information - Get the account information
+      - account_nonces - Get the latest nonce used by an account
+      - account_stx_balance - Get Account STX Balance
+      - account_stx_inbound - Get the account inbound STX Transfers
+      - account_transactions - Get Account Transactions
+      - account_transactions_with_transfers - Get Account Transactions including STX Transfers for each transaction
+      - account_transaction_by_id - Get Account Transaction information for a specific transaction
+      - address_recent_reward_slot_holders - Get the list of Bitcoin addresses that would receive PoX commitments for a given recipient address
+      - api_status - Get the API Status
+      - available_networks - Get the list of NetworkIdentifiers supported by the Rosetta Server.
+      - block - Get a block and its transactions by its ID in a given network.
+      - block_by_burnchain_hash - Get a block by the given burnchain block hash
+      - block_by_burnchain_height - Get a block by the given burnchain block height
+      - block_by_hash - Get a block by its hash
+      - block_by_height - Get a block by its height
+      - block_transaction - Get a a transaction by its ID in a given network and block IDs.
+      - circulating_stx_supply_plain_text - Get the circulating STX supply as plain text.
+      - contracts_by_trait - Get the list of contracts based on specific traits.
+      - contract_events - Get the events triggered by a contract.
+      - contract_info - Get a contract information
+      - contract_interface - Get a contract interface
+      - contract_source - Get the contract Clarity source code.
+      - core_api_info - Get the Core API information
+      - details_for_transactions - Get a list of transactions using an array of the transaction IDs.
+      - dropped_mempool_transactions - Get all recently broadcasted transactions to the mempool that have been dropped.
+      - estimated_stx_transfer_transaction_fee - Get the estimated fee rate for STX Transfers
+      - estimated_transaction_fee - Get the approximate fee for the supplied transaction.
+      - ft_by_contract_id_metadata - Get the metadata for fungible tokens for a given contract ID.
+      - fts_metadata - Get a list of fungible tokens with their metadata
+      - given_network_block_time - Get the given network target block time.
+      - legacy_stx_supply - Get the total and unlocked STX Supply with the results formatted for the legacy 1.0 API
+      - mempool_transaction - Get a mempool transaction by its ID in a given network
+      - mempool_transactions - Get all recently broadcasted transactions to the mempool.
+      - mempool_transactions_rosetta - Get the list of transactions currently in the mempool of a given network.
+      - microblock - Get a microblock by its hash.
+      - names - Get all the names that are known to the target node.
+      - namespace_price - Get the price of a specific namespace
+      - name_price - Get the price of a specific name
+      - namespaces - Get all namespaces
+      - namespace_names - Get all names that belong to a specific namespace
+      - name_details - Get the details of a specific name.
+      - name_subdomains - Get the subdomains of a name.
+      - name_zonefile - Get the zonefile of a name.
+      - name_historical_zonefile - Get the historical zonefile of a name.
+      - names_owned_by_address - Get all the names owned by a specific address.
+      - network_block_time - Get a network target block time
+      - network_options - Get the version information and allowed network-speciifc types for a given network ID.
+      - network_status - Get a given network status.
+      - nfts_metadata - Get a list of NFTs with their metadata
+      - nft_holdings - Get all the NFT owned by a given address.
+      - nft_history - Get all the relevant events for a given NFT.
+      - nft_mints - Get all the mint events for a specific NFT asset class.
+      - nft_by_contract_id_metadata - Get the metadata for NFTs belonging to a contract ID.
+      - proof_of_transfer_details - Get PoX information.
+      - raw_transaction - Get a raw transaction by its ID. (hex encoded)
+      - recent_reward_slot_holders - Get the list of Bitcoin addresses that would receive PoX commitments
+      - recent_reward_recipients - Get the list of recent burnchain reward recipients.
+      - recipient_recent_rewards - Get the list of recent burnchain rewards for a given recipient
+      - recipient_total_rewards - Get the list of total burnchain rewards for a given recipient
+      - read_only_function - Call a read-only public function in a specific smart contract.
+      - recent_transactions - Get the list of recently mined transactions.
+      - recent_blocks - Get the list of recently mined blocks
+      - recent_microblocks - Get the recent microblocks details.
+      - search - Search anything in the blockchain - blocks, transactions, contracts or accounts by a hash or an ID.
+      - signed_transaction_hash - Get a network-specific transaction hash for a signed transaction.
+      - sign_transaction - Returns the signed transaction version of an unsigned transaction payload.
+      - specific_data_map_in_contract - Get a contract data from a specific data map.
+      - stx_supply - Get the total and unlocked STX Supply
+      - submit_signed_transaction - Submit a signed transaction to the node.
+      - total_stx_supply_plain_text - Get the total STX supply as plain text
+      - transaction_construction_metadata - Get the metadata for a transaction consturction.
+      - transactions_by_block_hash - Get all transactions in a mined block by the block hash.
+      - transactions_by_block_height - Get all transactions in a mined block by the block height.
+      - transactions_by_address - Get all the transactions for a given address that are currently in the mempool.
+      - transaction_events - Get a list of transaction events.
+      - transaction - Get a transaction by its ID.
+      - transactions_in_unanchored_microblocks - Get the list of transactions that belong to an unanchored microblock.
 
 
   ## Available params
@@ -121,7 +123,7 @@ defmodule ExStacks.StacksAPI do
 
       Returns any of the following:
        - the return of the API Call
-       - {:error, :missing_required_params, [list,of,missing,required,parameters]} - Returned without hitting the API when one of the API call's required parameters are missing.
+       - {:error, :missing_required_params, [list,of,missing,required,parameters]} - Returned without hitting the API when one of the API call required parameters are missing.
        - {:error, :invalid_params} - Returned when the params input is not a map.
        - {:error, :unexpected_name} - Returned when the request name is not supported.
   """
@@ -498,20 +500,20 @@ defmodule ExStacks.StacksAPI do
 
   ## Available Events with their parameters:
 
-      - ``block``, no parameters - Subscribes to newly mined block events
-      - ``microblock``, no parameters - Subscribes to newly streamed microblocks events
-      - ``mempool``, no parameters - Subscribes to new transaction added to mempool events
-      - ``tx_updates``, parameters: ``:tx_id`` - Subscribes to new updates to this specific transaction
-      - ``address_tx_updates``, parameters: ``:address`` - Subscribes to new updates to transactions for this specific address
-      - ``address_balance_update``, parameters: ``:address`` - Subscribes to new updates to this specific address' balance
+      - block, no parameters - Subscribes to newly mined block events
+      - microblock, no parameters - Subscribes to newly streamed microblocks events
+      - mempool, no parameters - Subscribes to new transaction added to mempool events
+      - tx_updates, parameters: :tx_id - Subscribes to new updates to this specific transaction
+      - address_tx_updates, parameters: :address - Subscribes to new updates to transactions for this specific address
+      - address_balance_update, parameters: :address - Subscribes to new updates to this specific address balance
 
   ## Returns
 
-      Returns an ``:ok`` confirming the message has been relayed.
+      Returns an :ok confirming the message has been relayed.
 
   ## How it works
-    - All events require atleast one host project process to be present in ExStacks' WebSocketClient process list.
-    - All events will be relayed to all the processes, therefore you will need to pattern match the event you'd like to handle
+    - All events require atleast one host project process to be present in ExStacks WebSocketClient process list.
+    - All events will be relayed to all the processes, therefore you will need to pattern match the event youd like to handle
     - The format of an event will be a tuple, the first element(s) of the tuple will be to identify the event:
       - {:block, event}
       - {:microblock, event}
@@ -585,16 +587,16 @@ defmodule ExStacks.StacksAPI do
 
   ## Available Events with their parameters:
 
-      - ``block``, no parameters - Unsubscribes from newly mined block events
-      - ``microblock``, no parameters - Unsubscribes from newly streamed microblocks events
-      - ``mempool``, no parameters - Unsubscribes from new transaction added to mempool events
-      - ``tx_updates``, parameters: ``:tx_id`` - Unsubscribes from new updates to this specific transaction
-      - ``address_tx_updates``, parameters: ``:address`` - Unsubscribes from new updates to transactions for this specific address
-      - ``address_balance_update``, parameters: ``:address`` - Unsubscribes from new updates to this specific address' balance
+      - block, no parameters - Unsubscribes from newly mined block events
+      - microblock, no parameters - Unsubscribes from newly streamed microblocks events
+      - mempool, no parameters - Unsubscribes from new transaction added to mempool events
+      - tx_updates, parameters: :tx_id - Unsubscribes from new updates to this specific transaction
+      - address_tx_updates, parameters: :address - Unsubscribes from new updates to transactions for this specific address
+      - address_balance_update, parameters: :address - Unsubscribes from new updates to this specific address balance
 
   ## Returns
 
-      Returns an ``:ok`` confirming the message has been relayed.
+      Returns an :ok confirming the message has been relayed.
 
   ## How it works
     - To unregister a process to stop receiving events on it, include in the unsubscription parameters the key/value pair: %{pid: #PID<1.2.3>}

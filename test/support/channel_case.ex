@@ -14,6 +14,7 @@ defmodule ExStacksWeb.ChannelCase do
   by setting `use ExStacksWeb.ChannelCase, async: true`, although
   this option is not recommended for other databases.
   """
+  @moduledoc false
 
   use ExUnit.CaseTemplate
 

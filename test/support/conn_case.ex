@@ -14,6 +14,7 @@ defmodule ExStacksWeb.ConnCase do
   by setting `use ExStacksWeb.ConnCase, async: true`, although
   this option is not recommended for other databases.
   """
+  @moduledoc false
 
   use ExUnit.CaseTemplate
 

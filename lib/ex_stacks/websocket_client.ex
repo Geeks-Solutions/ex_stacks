@@ -2,6 +2,8 @@ defmodule ExStacks.WebSocketClient do
   @moduledoc """
   This module handles all the connections, messaging, handling the messages that are sent and received from the Stacks WebSocket server.
   """
+  @moduledoc false
+
   use WebSockex
   require Logger
   alias ExStacks.Helpers
