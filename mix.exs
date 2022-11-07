@@ -10,7 +10,15 @@ defmodule ExStacks.MixProject do
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+
+      # Docs
+      name: "Elixir Stacks",
+      source_url: "https://github.com/Geeks-Solutions/ex_stacks",
+      docs: [
+        main: "ExStacks", # The main page in the docs
+        extras: ["README.md"]
+      ]
     ]
   end
 
@@ -42,7 +50,8 @@ defmodule ExStacks.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:httpoison, "~> 1.8"},
       {:poison, "~> 5.0"},
-      {:websockex, "~> 0.4.3"}
+      {:websockex, "~> 0.4.3"},
+      {:ex_doc, "~> 0.29", only: :dev, runtime: false}
     ]
   end
 
