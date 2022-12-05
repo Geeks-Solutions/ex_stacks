@@ -26,7 +26,7 @@ defmodule ExStacks.MixProject do
 
   defp package() do
     [
-      organization: "geeks_solutions",
+      licenses: ["Apache-2.0"],
       links: %{"GitHub" => "https://github.com/Geeks-Solutions/ex_stacks",
               "Website" => "https://www.stacks.co/",
               "Example" => "https://github.com/Geeks-Solutions/ex_stacks_example"}
