@@ -1,6 +1,6 @@
 defmodule ExStacks.StacksAPI do
   @moduledoc """
-  This module is responsible of communicating with the Stacks Blockchain
+  This module is responsible for communicating with the Stacks Blockchain
 
   Function param atom keys are the same as the [API Docs](https://docs.hiro.so/api), however they must be snake cased.
   """
@@ -702,7 +702,7 @@ defmodule ExStacks.StacksAPI do
     end
   end
 
-  def url(action, params \\ %{}) do
+  defp url(action, params \\ %{}) do
     urls = %{
       "account_balances" =>
         "/extended/v1/address/#{Map.get(params, :principal)}/balances?#{query_params(params, [:principal])}",

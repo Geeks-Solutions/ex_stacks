@@ -5,12 +5,14 @@ defmodule ExStacks.MixProject do
     [
       app: :ex_stacks,
       version: "0.1.0",
+      description: "An elixir package to interact with the Stacks Blockchain",
       elixir: "~> 1.12",
       elixirc_paths: elixirc_paths(Mix.env()),
       compilers: Mix.compilers(),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
       deps: deps(),
+      package: package(),
 
       # Docs
       name: "Elixir Stacks",
@@ -19,6 +21,15 @@ defmodule ExStacks.MixProject do
         main: "ExStacks", # The main page in the docs
         extras: ["README.md"]
       ]
+    ]
+  end
+
+  defp package() do
+    [
+      organization: "geeks_solutions",
+      links: %{"GitHub" => "https://github.com/Geeks-Solutions/ex_stacks",
+              "Website" => "https://www.stacks.co/",
+              "Example" => "https://github.com/Geeks-Solutions/ex_stacks_example"}
     ]
   end
 
